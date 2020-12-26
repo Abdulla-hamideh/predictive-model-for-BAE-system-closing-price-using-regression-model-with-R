@@ -54,10 +54,10 @@ pairs(l[1:6], panel = panel.lm,
       font.labels = 2)
 
 # new model 
-#normalize <- function(x) {
-  #return ((x - min(x)) / (max(x) - min(x))) } 
-#D <- normalize(d)
-#View(D)
+normalize <- function(x) {
+  return ((x - min(x)) / (max(x) - min(x))) } 
+D <- normalize(d)
+View(D)
 
 # plot each independent against the  dependent 
 
@@ -355,6 +355,8 @@ dep6 <-lm(BA~ STJ + VOD + CPG+ DLG + NMC + BATS +
 drop1(dep6,scope= ~ STJ + VOD + CPG+ DLG  +NMC+ BATS + 
         CNA3 + RTO + ANTO+ LLOY + AHT+ RTO, test = "F")
 
+
+
 finalmodel <- lm(BA ~ STJ + VOD + CPG+ DLG  +NMC+ BATS + 
                    CNA3 + RTO + ANTO+ LLOY + AHT+ RTO, data= D)
 summary(finalmodel)
@@ -372,8 +374,21 @@ acf(residuals(finalmodel))
 # transforming depandant 
 boxcox(finalmodel)
 
-root.finalmodel <- lm(sqrt(BA)~ STJ + VOD + CPG+ DLG  +NMC+ BATS + 
+root.finalmodel <- lm(BA~ STJ + VOD + CPG+ DLG  +NMC+ BATS + 
                         CNA3 + RTO + ANTO+ LLOY + AHT+ RTO, data= D)
 summary(root.finalmodel)
 acf(residuals(root.finalmodel))
 
+
+CP_PRESS <- function(model, sigma_full){
+res <- resid(model)
+hat_mod <- hatvalues(model)
+CP <- sum(res^2)/sigma_full + 2*length(coef(model)) - length(res)
+PRESS <- sum(res^2/(1-hat_mod)^2)
+list(Cp=CP, PRESS=PRESS)
+}
+sigma_q <- summary(full.mod)$sigma^2
+size8_stat <- CP_PRESS(size8, sigma_q)
+size9_stat <- CP_PRESS(size9, sigma_q)
+size10_stat <- CP_PRESS(size10, sigma_q)
+sel_stat <- CP_PRESS(mod, sigma_q)
