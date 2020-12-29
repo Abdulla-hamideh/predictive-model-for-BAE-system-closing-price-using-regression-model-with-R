@@ -54,7 +54,7 @@ pairs(l[1:6], panel = panel.lm,
       cex = 1.5, pch = 19, col = adjustcolor(4, .4), cex.labels = 2, 
       font.labels = 2)
 
-# new model 
+# new model normalizaing the data 
 normalize <- function(x) {
   return ((x - min(x)) / (max(x) - min(x))) } 
 D <- normalize(d)
@@ -328,6 +328,55 @@ plot(lm24, which = c(1,2), ask = F)
 plot(lm25, which = c(1,2), ask = F)
 plot(lm26, which = c(1,2), ask = F)
 
+##leaps
+
+
+
+leap.mod <- leaps(D[,-ncol(D)], housing$BA,
+method="adjr2", nbest=5, names=names(D)[-ncol(D)])
+
+
+
+result.tab <- data.frame(adjr2=leap.mod$adjr2,
+                         size=leap.mod$size,
+                         leap.mod$which,
+                         row.names=NULL)
+
+head(leaps_results.tab)
+
+
+# base r plot
+plot(adjr2~size, data=result.tab)
+
+##after 15 small change in adjusted r2
+## 15 variables
+leaps_results.tab %>%
+  filter(size== 15)
+
+
+## 17 variables
+leaps_results.tab %>%
+  filter(size== 17)
+
+## 22 variables
+leaps_results.tab %>%
+  filter(size== 22)
+
+
+
+# fit the chosen models
+leaps_l1 <- lm(formula = BA ~  STJ + RB + PRU + CCH + VOD + 
+                 GVC + CPG + DLG + SDR + NMC +SPX + TSCO + RTO + logAHT , data = lse_leaps)
+
+leaps_l2 <- lm(formula = BA ~  STJ + RB + PRU + CCH + EXPN + VOD +
+                 GVC + CPG + DLG + SDR + NMC +SPX + TSCO + RTO + logAHT + LLOY, data = lse_leaps)
+
+leaps_l3 <- lm(formula = BA ~  STJ+RB+PRU+CCH+ EXPN+VOD+GVC+CPG+DLG+  
+                LLOY+RMV+SDR+SMT+EZJ+NMC+BATS+SPX+TSCO+RTO+MIN3+logAHT, data = lse_leaps)
+summary(leaps_l1)
+summary(leaps_l2)
+summary(leaps_l3)
+
 
 # variable selection (backwards)
 dep <- lm(BA~ ., data=D)
@@ -356,6 +405,171 @@ dep6 <-lm(BA~ STJ + VOD + CPG+ DLG + NMC + BATS +
 drop1(dep6,scope= ~ STJ + VOD + CPG+ DLG  +NMC+ BATS + 
         CNA3 + RTO + ANTO+ LLOY + AHT+ RTO, test = "F")
 
+## variable selection
+#forward
+
+# fit the full model
+m1 <- lm(BA ~ 1, data=D)
+
+add1(m1, scope= ~ STJ + RB + MIN3 + PRU + CCH + EXPN + VOD + GVC + logAHT + CPG +
+       CCL + RR + DLG + TUI + LLOY + RMV +SSE3 + SDR + SMT + EZJ + NMC + BATS + SPX + TSCO +CNA3 +RTO + ANTO ,
+     test="F")
+
+m2 <- lm(BA ~ STJ, data=D)
+
+add1(m2, scope= ~ STJ + RB + MIN3 + PRU + CCH + EXPN + VOD + GVC + logAHT + CPG +
+       CCL + RR + DLG + TUI + LLOY + RMV +SSE3 + SDR + SMT + EZJ + NMC + BATS + SPX + TSCO +CNA3 +RTO + ANTO ,
+     test="F")
+
+m3 <- lm(BA ~ STJ + DLG, data=D)
+
+add1(m3, scope= ~ STJ + RB + MIN3 + PRU + CCH + EXPN + VOD + GVC + logAHT + CPG +
+       CCL + RR + DLG + TUI + LLOY + RMV +SSE3 + SDR + SMT + EZJ + NMC + BATS + SPX + TSCO +CNA3 +RTO + ANTO ,
+     test="F")
+
+m4 <- lm(BA ~ STJ + DLG + BATS, data=D)
+
+add1(m4, scope= ~ STJ + RB + MIN3 + PRU + CCH + EXPN + VOD + GVC + logAHT + CPG +
+       CCL + RR + DLG + TUI + LLOY + RMV +SSE3 + SDR + SMT + EZJ + NMC + BATS + SPX + TSCO +CNA3 +RTO + ANTO ,
+     test="F")
+
+m5 <- lm(BA ~ STJ + DLG + BATS + VOD, data=D)
+
+add1(m5, scope= ~ STJ + RB + MIN3 + PRU + CCH + EXPN + VOD + GVC + logAHT + CPG +
+       CCL + RR + DLG + TUI + LLOY + RMV +SSE3 + SDR + SMT + EZJ + NMC + BATS + SPX + TSCO +CNA3 +RTO + ANTO ,
+     test="F")
+
+m6 <- lm(BA ~ STJ + DLG + BATS + VOD +RTO, data=D)
+
+add1(m6, scope= ~ STJ + RB + MIN3 + PRU + CCH + EXPN + VOD + GVC + logAHT + CPG +
+       CCL + RR + DLG + TUI + LLOY + RMV +SSE3 + SDR + SMT + EZJ + NMC + BATS + SPX + TSCO +CNA3 +RTO + ANTO ,
+     test="F")
+
+m7 <- lm(BA ~ STJ + DLG + BATS + VOD +RTO + GVC, data=D)
+
+add1(m7, scope= ~ STJ + RB + MIN3 + PRU + CCH + EXPN + VOD + GVC + logAHT + CPG +
+       CCL + RR + DLG + TUI + LLOY + RMV +SSE3 + SDR + SMT + EZJ + NMC + BATS + SPX + TSCO +CNA3 +RTO + ANTO ,
+     test="F")
+
+m8 <- lm(BA ~ STJ + DLG + BATS + VOD +RTO + GVC +CPG, data=D)
+
+add1(m8, scope= ~ STJ + RB + MIN3 + PRU + CCH + EXPN + VOD + GVC + logAHT + CPG +
+       CCL + RR + DLG + TUI + LLOY + RMV +SSE3 + SDR + SMT + EZJ + NMC + BATS + SPX + TSCO +CNA3 +RTO + ANTO ,
+     test="F")
+
+m9 <- lm(BA ~ STJ + DLG + BATS + VOD +RTO + GVC +CPG+SPX, data=D)
+
+add1(m9, scope= ~ STJ + RB + MIN3 + PRU + CCH + EXPN + VOD + GVC + logAHT + CPG +
+       CCL + RR + DLG + TUI + LLOY + RMV +SSE3 + SDR + SMT + EZJ + NMC + BATS + SPX + TSCO +CNA3 +RTO + ANTO ,
+     test="F")
+
+m10 <-  lm(BA ~ STJ + DLG + BATS + VOD +RTO + GVC +CPG+SPX + log(AHT), data=D)
+
+add1(m10, scope= ~ STJ + RB + MIN3 + PRU + CCH + EXPN + VOD + GVC + log(AHT) + CPG +
+       CCL + RR + DLG + TUI + LLOY + RMV +SSE3 + SDR + SMT + EZJ + NMC + BATS + SPX + TSCO +CNA3 +RTO + ANTO ,
+     test="F")
+
+m11 <- lm(BA ~ STJ + DLG + BATS + VOD +RTO + GVC +CPG+SPX + logAHT + MIN3, data=D)
+
+add1(m11, scope= ~ STJ + RB + MIN3 + PRU + CCH + EXPN + VOD + GVC + log(AHT) + CPG +
+       CCL + RR + DLG + TUI + LLOY + RMV +SSE3 + SDR + SMT + EZJ + NMC + BATS + SPX + TSCO +CNA3 +RTO + ANTO ,
+     test="F")
+
+m12 <- lm(BA ~ STJ + DLG + BATS + VOD +RTO + GVC +CPG+SPX + logAHT + MIN3 + RB, data=D)
+add1(m12, scope= ~ STJ + RB + MIN3 + PRU + CCH + EXPN + VOD + GVC + log(AHT) + CPG +
+       CCL + RR + DLG + TUI + LLOY + RMV +SSE3 + SDR + SMT + EZJ + NMC + BATS + SPX + TSCO +CNA3 +RTO + ANTO ,
+     test="F")
+
+m13 <- lm(BA ~ STJ + DLG + BATS + VOD +RTO + GVC +CPG+SPX + logAHT + MIN3 + RB + PRU, data=D)
+
+add1(m13, scope= ~ STJ + RB + MIN3 + PRU + CCH + EXPN + VOD + GVC + log(AHT) + CPG +
+       CCL + RR + DLG + TUI + LLOY + RMV +SSE3 + SDR + SMT + EZJ + NMC + BATS + SPX + TSCO +CNA3 +RTO + ANTO ,
+     test="F")
+
+m14 <- lm(BA ~ STJ + DLG + BATS + VOD +RTO + GVC +CPG+SPX + logAHT + MIN3 + RB + PRU+ TSCO, data=D)
+
+add1(m14, scope= ~ STJ + RB + MIN3 + PRU + CCH + EXPN + VOD + GVC + log(AHT) + CPG +
+       CCL + RR + DLG + TUI + LLOY + RMV +SSE3 + SDR + SMT + EZJ + NMC + BATS + SPX + TSCO +CNA3 +RTO + ANTO ,
+     test="F")
+
+m15 <- lm(BA ~ STJ + DLG + BATS + VOD +RTO + GVC +CPG+SPX + logAHT + MIN3 + RB + PRU+ TSCO + CCH, data=D)
+
+add1(m15, scope= ~ STJ + RB + MIN3 + PRU + CCH + EXPN + VOD + GVC + logAHT + CPG +
+       CCL + RR + DLG + TUI + LLOY + RMV +SSE3 + SDR + SMT + EZJ + NMC + BATS + SPX + TSCO +CNA3 +RTO + ANTO ,
+     test="F")
+
+m16 <-lm(BA ~ STJ + DLG + BATS + VOD +RTO + GVC +CPG+SPX + logAHT + MIN3 + RB + PRU+ TSCO + CCH +SDR, data=D)
+
+add1(m16, scope= ~ STJ + RB + MIN3 + PRU + CCH + EXPN + VOD + GVC + logAHT + CPG +
+       CCL + RR + DLG + TUI + LLOY + RMV +SSE3 + SDR + SMT + EZJ + NMC + BATS + SPX + TSCO +CNA3 +RTO + ANTO ,
+     test="F")
+
+m17 <- lm(BA ~ STJ + DLG + BATS + VOD +RTO + GVC +CPG+SPX + logAHT + MIN3 + RB + PRU+ TSCO + CCH +SDR +SMT, data=D)
+
+add1(m17, scope= ~ STJ + RB + MIN3 + PRU + CCH + EXPN + VOD + GVC + logAHT + CPG +
+       CCL + RR + DLG + TUI + LLOY + RMV +SSE3 + SDR + SMT + EZJ + NMC + BATS + SPX + TSCO +CNA3 +RTO + ANTO ,
+     test="F")
+
+m18 <-lm(BA ~ STJ + DLG + BATS + VOD +RTO + GVC +CPG+SPX + logAHT + MIN3 + RB + PRU+ TSCO + CCH +SDR +SMT +RMV, data=D)
+
+add1(m18, scope= ~ STJ + RB + MIN3 + PRU + CCH + EXPN + VOD + GVC + logAHT + CPG +
+       CCL + RR + DLG + TUI + LLOY + RMV +SSE3 + SDR + SMT + EZJ + NMC + BATS + SPX + TSCO +CNA3 +RTO + ANTO ,
+     test="F")
+
+m19 <- lm(BA ~ STJ + DLG + BATS + VOD +RTO + GVC +CPG+SPX + logAHT + MIN3 + RB + PRU+ TSCO + CCH +SDR +SMT +RMV +LLOY, data=D)
+
+add1(m19, scope= ~ STJ + RB + MIN3 + PRU + CCH + EXPN + VOD + GVC + logAHT + CPG +
+       CCL + RR + DLG + TUI + LLOY + RMV +SSE3 + SDR + SMT + EZJ + NMC + BATS + SPX + TSCO +CNA3 +RTO + ANTO ,
+     test="F")
+
+m20 <- lm(BA ~ STJ + DLG + BATS + VOD +RTO + GVC +CPG+SPX + logAHT + MIN3 + RB + PRU+ TSCO + CCH +SDR +SMT +RMV +LLOY + EXPN, data=D)
+
+add1(m20, scope= ~ STJ + RB + MIN3 + PRU + CCH + EXPN + VOD + GVC + logAHT + CPG +
+       CCL + RR + DLG + TUI + LLOY + RMV +SSE3 + SDR + SMT + EZJ + NMC + BATS + SPX + TSCO +CNA3 +RTO + ANTO ,
+     test="F")
+
+m21 <-lm(BA ~ STJ + DLG + BATS + VOD +RTO + GVC +CPG+SPX + logAHT + MIN3 + RB + PRU+ TSCO + CCH +SDR +SMT +RMV +LLOY + EXPN +NMC, data=D)
+
+add1(m21, scope= ~ STJ + RB + MIN3 + PRU + CCH + EXPN + VOD + GVC + logAHT + CPG +
+       CCL + RR + DLG + TUI + LLOY + RMV +SSE3 + SDR + SMT + EZJ + NMC + BATS + SPX + TSCO +CNA3 +RTO + ANTO ,
+     test="F")
+
+m22 <- lm(BA ~ STJ + DLG + BATS + VOD +RTO + GVC +CPG+SPX + logAHT + MIN3 + RB + PRU+ TSCO + CCH +SDR +SMT +RMV +LLOY + EXPN +NMC +EZJ, data=D)
+
+add1(m22, scope= ~ STJ + RB + MIN3 + PRU + CCH + EXPN + VOD + GVC + logAHT + CPG +
+       CCL + RR + DLG + TUI + LLOY + RMV +SSE3 + SDR + SMT + EZJ + NMC + BATS + SPX + TSCO +CNA3 +RTO + ANTO ,
+     test="F")
+
+m23 <- lm(BA ~ STJ + DLG + BATS + VOD +RTO + GVC +CPG+SPX + logAHT + MIN3 + RB + PRU+ TSCO + CCH +SDR +SMT +RMV +LLOY + EXPN +NMC +EZJ + SSE3, data=D)
+
+add1(m23, scope= ~ STJ + RB + MIN3 + PRU + CCH + EXPN + VOD + GVC + logAHT + CPG +
+       CCL + RR + DLG + TUI + LLOY + RMV +SSE3 + SDR + SMT + EZJ + NMC + BATS + SPX + TSCO +CNA3 +RTO + ANTO ,
+     test="F")
+
+m24 <- lm(BA ~ STJ + DLG + BATS + VOD +RTO + GVC +CPG+SPX + logAHT + MIN3 + RB + PRU+ TSCO + CCH +SDR +SMT +RMV +LLOY + EXPN +NMC +EZJ + SSE3 +CCL, data=D)
+
+add1(m24, scope= ~ STJ + RB + MIN3 + PRU + CCH + EXPN + VOD + GVC + logAHT + CPG +
+       CCL + RR + DLG + TUI + LLOY + RMV +SSE3 + SDR + SMT + EZJ + NMC + BATS + SPX + TSCO +CNA3 +RTO + ANTO ,
+     test="F")
+
+m25 <- lm(BA ~ STJ + DLG + BATS + VOD +RTO + GVC +CPG+SPX + logAHT + MIN3 + RB + PRU+ TSCO + CCH +SDR +SMT +RMV +LLOY + EXPN +NMC +EZJ + SSE3 +CCL +RR, data=D)
+
+add1(m25, scope= ~ STJ + RB + MIN3 + PRU + CCH + EXPN + VOD + GVC + logAHT + CPG +
+       CCL + RR + DLG + TUI + LLOY + RMV +SSE3 + SDR + SMT + EZJ + NMC + BATS + SPX + TSCO +CNA3 +RTO + ANTO ,
+     test="F")
+
+m26 <- lm(BA ~ STJ + DLG + BATS + VOD +RTO + GVC +CPG+SPX + logAHT + MIN3 + RB + PRU+ TSCO + CCH +SDR +SMT +RMV +LLOY + EXPN +NMC +EZJ + SSE3 +CCL +RR +CNA3, data=D)
+
+add1(m26, scope= ~ STJ + RB + MIN3 + PRU + CCH + EXPN + VOD + GVC + logAHT + CPG +
+       CCL + RR + DLG + TUI + LLOY + RMV +SSE3 + SDR + SMT + EZJ + NMC + BATS + SPX + TSCO +CNA3 +RTO + ANTO ,
+     test="F")
+
+forwardmodel <-  lm(BA ~ STJ + DLG + BATS + VOD +RTO + GVC +CPG+SPX + logAHT
+                    + MIN3 + RB + PRU+ TSCO + CCH +SDR +SMT +RMV +LLOY + EXPN 
+                    +NMC +EZJ + SSE3 +CCL +RR +CNA3, data=D)
+
+summary(forwardmodel)
+
 
 
 finalmodel <- lm(BA ~ STJ + VOD + CPG+ DLG  +NMC+ BATS + 
@@ -380,6 +594,12 @@ root.finalmodel <- lm(BA~ STJ + VOD + CPG+ DLG  +NMC+ BATS +
 summary(root.finalmodel)
 acf(residuals(root.finalmodel))
 
+## MODEL ACCORDING TO STEPWISE SELECTION
+
+stepwisemodel <-lm(formula = BA ~ STJ + DLG + BATS + VOD + RTO + GVC + CPG + 
+                  SPX + logAHT + MIN3 + RMV + SSE3 + CCL + TSCO + CCH + SMT + 
+                  RB + PRU + SDR + LLOY + EXPN + NMC + TUI + RR, data = lse_leaps)
+summary(stepwisemodel)
 
 CP_PRESS <- function(model, sigma_full){
 res <- resid(model)
@@ -389,7 +609,7 @@ PRESS <- sum(res^2/(1-hat_mod)^2)
 list(Cp=CP, PRESS=PRESS)
 }
 sigma_q <- summary(full.mod)$sigma^2
-size8_stat <- CP_PRESS(size8, sigma_q)
-size9_stat <- CP_PRESS(size9, sigma_q)
-size10_stat <- CP_PRESS(size10, sigma_q)
+size8_stat <- CP_PRESS(size15, sigma_q)
+size9_stat <- CP_PRESS(size17, sigma_q)
+size10_stat <- CP_PRESS(size22, sigma_q)
 sel_stat <- CP_PRESS(mod, sigma_q)
