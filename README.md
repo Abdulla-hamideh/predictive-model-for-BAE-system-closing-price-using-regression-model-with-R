@@ -2,7 +2,7 @@
 data derived from yahoo finance closing price from 2015 to 2018
 
 # Objectives 
-trying to build a model to predict BAE system closing stock price vs the actual price for 2019 
+trying to build a model to predict BAE system closing stock price vs the actual price for 2019-2020
 
 # What the code includes 
 assessing the correlation for top 5 companies that correlate with BAE System then building a simple regression model of 5 independent variables this is the first model 
